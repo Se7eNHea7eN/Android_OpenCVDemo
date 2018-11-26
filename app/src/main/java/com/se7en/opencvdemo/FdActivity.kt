@@ -155,12 +155,11 @@ class FdActivity : Activity(), CvCameraViewListener2 {
     }
 
     override fun onCameraViewStopped() {
-        mGray!!.release()
-        mRgba!!.release()
+        mGray?.release()
+        mRgba?.release()
     }
 
     override fun onCameraFrame(inputFrame: CvCameraViewFrame): Mat? {
-
         mRgba = inputFrame.rgba()
         mGray = inputFrame.gray()
 
