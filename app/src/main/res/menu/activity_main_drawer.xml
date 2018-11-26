@@ -5,8 +5,9 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/navigation_gles10"
-            android:title="" />
+            android:id="@+id/blurring"
+            android:title="平滑处理"
+            android:icon="@drawable/ic_menu_gallery"/>
     </group>
 
 </menu>

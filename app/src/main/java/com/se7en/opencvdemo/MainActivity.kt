@@ -28,9 +28,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
     private var mRgba: Mat? = null
     private var mGray: Mat? = null
-    private var mRelativeFaceSize = 0.2f
-    private var mAbsoluteFaceSize = 0
 
+    private var currentProcessor : BaseImageProcessor ?= null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             super.onBackPressed()
         }
     }
-
+//
 //    fun replaceFragment(fragment: Fragment) {
 //        supportFragmentManager.beginTransaction().replace(id.fragmentContainer, fragment).commit()
 //    }
@@ -85,7 +84,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Core.flip(inputFrame.rgba(), mRgba, 1);
         Core.flip(inputFrame.gray(), mGray, 1);
 
-        return mRgba!!
+        return  mRgba!!
     }
 
     public override fun onResume() {
