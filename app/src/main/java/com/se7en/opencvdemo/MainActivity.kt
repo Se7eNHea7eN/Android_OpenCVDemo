@@ -8,8 +8,17 @@ import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import org.opencv.android.BaseLoaderCallback
+import org.opencv.android.CameraBridgeViewBase
+import org.opencv.android.LoaderCallbackInterface
+import org.opencv.android.OpenCVLoader
+import org.opencv.core.Core
+import org.opencv.core.CvType
+import org.opencv.core.Mat
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener,
+    CameraBridgeViewBase.CvCameraViewListener2 {
+
     companion object {
         init {
             System.loadLibrary("opencv_java3");
@@ -17,6 +26,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             System.loadLibrary("native-lib")
         }
     }
+    private var mRgba: Mat? = null
+    private var mGray: Mat? = null
+    private var mRelativeFaceSize = 0.2f
+    private var mAbsoluteFaceSize = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +42,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         drawer_layout.openDrawer(GravityCompat.START)
 
         nav_view.setNavigationItemSelectedListener(this)
+        cameraView.setCameraIndex(CameraBridgeViewBase.CAMERA_ID_FRONT)
+        cameraView.visibility = CameraBridgeViewBase.VISIBLE
+        cameraView.setCvCameraViewListener(this)
+        cameraView.enableView()
 
 //        replaceFragment(TextureMappingFragment())
     }
@@ -49,15 +66,53 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
 //        when (item.itemId) {
-//            id.navigation_gles10 -> replaceFragment(GLES10Fragment())
-//            id.navigation_customizeshader -> replaceFragment(ShaderFragment())
-//            id.navigation_texture -> replaceFragment(TextureFragment())
-//            id.navigation_3d -> replaceFragment(CubeFragment())
-//            id.navigation_texture_mapping -> replaceFragment(TextureMappingFragment())
-//            id.navigation_lighting -> replaceFragment(LightingFragment())
+
 //        }
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
+
+    override fun onCameraViewStarted(width: Int, height: Int) {
+        mRgba = Mat(width, height, CvType.CV_8UC4);
+        mGray = Mat(height, width, CvType.CV_8UC4);
+    }
+
+    override fun onCameraViewStopped() {
+    }
+
+    override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame): Mat {
+        Core.flip(inputFrame.rgba(), mRgba, 1);
+        Core.flip(inputFrame.gray(), mGray, 1);
+
+        return mRgba!!
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        if (!OpenCVLoader.initDebug()) {
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback)
+        } else {
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS)
+        }
+    }
+
+    public override fun onDestroy() {
+        super.onDestroy()
+        cameraView.disableView()
+    }
+
+    private val mLoaderCallback = object : BaseLoaderCallback(this) {
+        override fun onManagerConnected(status: Int) {
+            when (status) {
+                LoaderCallbackInterface.SUCCESS -> {
+                }
+                else -> {
+                    super.onManagerConnected(status)
+                }
+            }
+        }
+    }
+
+
 }

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.Surface
 import android.view.WindowManager
 import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.CameraBridgeViewBase
@@ -13,10 +14,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2
 import org.opencv.android.LoaderCallbackInterface
 import org.opencv.android.OpenCVLoader
-import org.opencv.core.Mat
-import org.opencv.core.MatOfRect
-import org.opencv.core.Scalar
-import org.opencv.core.Size
+import org.opencv.core.*
 import org.opencv.imgproc.Imgproc
 import org.opencv.objdetect.CascadeClassifier
 import java.io.File
@@ -27,8 +25,8 @@ class FdActivity : Activity(), CvCameraViewListener2 {
     companion object {
         private val TAG = "OCVSample::Activity"
         private val FACE_RECT_COLOR = Scalar(0.0, 255.0, 0.0, 255.0)
-        val JAVA_DETECTOR = 0
-        val NATIVE_DETECTOR = 1
+        val JAVA_DETECTOR = 1
+        val NATIVE_DETECTOR = 0
 
         // Used to load the 'native-lib' library on application startup.
         init {
@@ -46,6 +44,8 @@ class FdActivity : Activity(), CvCameraViewListener2 {
 
     private var mRgba: Mat? = null
     private var mGray: Mat? = null
+    private var Matlin : Mat? = null
+    private var gMatlin : Mat? = null
     private var mCascadeFile: File? = null
     private var mJavaDetector: CascadeClassifier? = null
     private var mNativeDetector: DetectionBasedTracker? = null
@@ -108,7 +108,7 @@ class FdActivity : Activity(), CvCameraViewListener2 {
     }
 
     init {
-        mDetectorName = arrayOf("Java","Native (tracking)")
+        mDetectorName = arrayOf("Java", "Native (tracking)")
 
         Log.i(TAG, "Instantiated new " + this.javaClass)
     }
@@ -150,8 +150,11 @@ class FdActivity : Activity(), CvCameraViewListener2 {
     }
 
     override fun onCameraViewStarted(width: Int, height: Int) {
-        mGray = Mat()
-        mRgba = Mat()
+        mGray = Mat(height, width, CvType.CV_8UC4)
+        mRgba = Mat(width, height, CvType.CV_8UC4)
+        gMatlin = Mat(width, height, CvType.CV_8UC4)
+        Matlin = Mat(width, height, CvType.CV_8UC4)
+        mAbsoluteFaceSize = (height * 0.2f).toInt()
     }
 
     override fun onCameraViewStopped() {
@@ -160,8 +163,8 @@ class FdActivity : Activity(), CvCameraViewListener2 {
     }
 
     override fun onCameraFrame(inputFrame: CvCameraViewFrame): Mat? {
-        mRgba = inputFrame.rgba()
-        mGray = inputFrame.gray()
+        mGray = inputFrame.gray();
+        mRgba = inputFrame.rgba();
 
         if (mAbsoluteFaceSize == 0) {
             val height = mGray!!.rows()
@@ -171,25 +174,37 @@ class FdActivity : Activity(), CvCameraViewListener2 {
             mNativeDetector!!.setMinFaceSize(mAbsoluteFaceSize)
         }
 
-        val faces = MatOfRect()
+        val rotation = mOpenCvCameraView!!.getDisplay().getRotation()
 
-        if (mDetectorType == JAVA_DETECTOR) {
-            if (mJavaDetector != null)
-                mJavaDetector!!.detectMultiScale(
-                    mGray, faces, 1.1, 2, 2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
-                    Size(mAbsoluteFaceSize.toDouble(), mAbsoluteFaceSize.toDouble()), Size()
-                )
-        } else if (mDetectorType == NATIVE_DETECTOR) {
-            if (mNativeDetector != null)
-                mNativeDetector!!.detect(mGray, faces)
+        //使前置的图像也是正的
+//        if (camera_scene == CAMERA_FRONT) {
+            Core.flip(mRgba, mRgba, 1);
+            Core.flip(mGray, mGray, 1);
+//        }
+
+        //MatOfRect faces = new MatOfRect();
+
+        if (rotation == Surface.ROTATION_0) {
+            val faces = MatOfRect()
+            Core.rotate(mGray, gMatlin, Core.ROTATE_90_CLOCKWISE);
+            Core.rotate(mRgba, Matlin, Core.ROTATE_90_CLOCKWISE);
+            mNativeDetector!!.detect(gMatlin, faces)
+
+            val faceArray = faces.toArray();
+            faceArray.forEach {
+                Imgproc.rectangle(Matlin, it.tl(), it.br(), FACE_RECT_COLOR, 2);
+            }
+
+            Core.rotate(Matlin, mRgba, Core.ROTATE_90_COUNTERCLOCKWISE);
+
         } else {
-            Log.e(TAG, "Detection method is not selected!")
-        }
+            val faces = MatOfRect()
+            mNativeDetector!!.detect(mGray,faces)
+            faces.toArray().forEach {
+                Imgproc.rectangle(mRgba, it.tl(), it.br(),FACE_RECT_COLOR, 2);
 
-        val facesArray = faces.toArray()
-        for (i in facesArray.indices)
-            Imgproc.rectangle(mRgba!!, facesArray[i].tl(), facesArray[i].br(),
-                FACE_RECT_COLOR, 3)
+            }
+        }
 
         return mRgba
     }

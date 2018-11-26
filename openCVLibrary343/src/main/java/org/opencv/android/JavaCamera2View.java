@@ -1,17 +1,9 @@
 package org.opencv.android;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.*;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
@@ -21,10 +13,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.ViewGroup.LayoutParams;
-
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * This class is an implementation of the Bridge View between OpenCV and Java Camera.
@@ -192,7 +186,6 @@ public class JavaCamera2View extends CameraBridgeViewBase {
 
             mPreviewRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             mPreviewRequestBuilder.addTarget(surface);
-
             mCameraDevice.createCaptureSession(Arrays.asList(surface),
                 new CameraCaptureSession.StateCallback() {
                     @Override

@@ -7,12 +7,13 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Rect;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import org.opencv.BuildConfig;
 import org.opencv.R;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -409,6 +410,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             Canvas canvas = getHolder().lockCanvas();
             if (canvas != null) {
                 canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+/*
+                //原来的方法
                 if (BuildConfig.DEBUG)
                     Log.d(TAG, "mStretch value: " + mScale);
 
@@ -425,6 +428,42 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                          (canvas.getWidth() - mCacheBitmap.getWidth()) / 2 + mCacheBitmap.getWidth(),
                          (canvas.getHeight() - mCacheBitmap.getHeight()) / 2 + mCacheBitmap.getHeight()), null);
                 }
+*/
+
+
+
+//method4
+                Matrix matrix = new Matrix(); // I rotate it with minimal process
+                //matrix.preTranslate((canvas.getWidth() - mCacheBitmap.getWidth()) / 2,(canvas.getHeight() - mCacheBitmap.getHeight()) / 2);
+                //matrix.postRotate(90f,(canvas.getWidth()) / 2,(canvas.getHeight()) / 2);
+                //float scale = (float) canvas.getWidth() / (float) mCacheBitmap.getHeight();
+                //matrix.postScale(scale, scale, canvas.getWidth()/2 , canvas.getHeight()/2 );
+                //canvas.drawBitmap(mCacheBitmap, matrix, new Paint());
+//end
+
+                if (getDisplay().getRotation() == Surface.ROTATION_0) {
+                    matrix.preTranslate((canvas.getWidth() - mCacheBitmap.getWidth()) / 2,(canvas.getHeight() - mCacheBitmap.getHeight()) / 2);
+                    matrix.postRotate(90f,(canvas.getWidth()) / 2,(canvas.getHeight()) / 2);
+                    float scale = (float) canvas.getWidth() / (float) mCacheBitmap.getHeight();
+                    matrix.postScale(scale, scale, canvas.getWidth()/2 , canvas.getHeight()/2 );
+                    canvas.drawBitmap(mCacheBitmap, matrix, new Paint());
+                } else if (getDisplay().getRotation() == Surface.ROTATION_90) {
+                    float scale = (float) canvas.getWidth() / (float) mCacheBitmap.getHeight();
+                    matrix.postScale(scale, scale, canvas.getWidth()/2 , canvas.getHeight()/2 );
+                    canvas.drawBitmap(mCacheBitmap, matrix, new Paint());
+                } else if (getDisplay().getRotation() == Surface.ROTATION_180) {
+                    matrix.preTranslate((canvas.getWidth() - mCacheBitmap.getWidth()) / 2,(canvas.getHeight() - mCacheBitmap.getHeight()) / 2);
+                    matrix.postRotate(270f,(canvas.getWidth()) / 2,(canvas.getHeight()) / 2);
+                    float scale = (float) canvas.getWidth() / (float) mCacheBitmap.getHeight();
+                    matrix.postScale(scale, scale, canvas.getWidth()/2 , canvas.getHeight()/2 );
+                    canvas.drawBitmap(mCacheBitmap, matrix, new Paint());
+                } else if (getDisplay().getRotation() == Surface.ROTATION_270) {
+                    matrix.postRotate(180f,(canvas.getWidth()) / 2,(canvas.getHeight()) / 2);
+                    float scale = (float) canvas.getWidth() / (float) mCacheBitmap.getHeight();
+                    matrix.postScale(scale, scale, canvas.getWidth()/2 , canvas.getHeight()/2 );
+                    canvas.drawBitmap(mCacheBitmap, matrix, new Paint());
+                }
+
 
                 if (mFpsMeter != null) {
                     mFpsMeter.measure();
@@ -434,6 +473,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             }
         }
     }
+
 
     /**
      * This method is invoked shall perform concrete operation to initialize the camera.
