@@ -1,6 +1,7 @@
 package com.se7en.opencvdemo.facedetect
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import android.view.Surface
 import com.se7en.opencvdemo.BaseImageFragment
@@ -13,16 +14,17 @@ import java.io.IOException
 
 class FaceDetectFragment : BaseImageFragment() {
     val TAG = "FaceDetect"
-    private var Matlin: Mat? = null
-    private var gMatlin: Mat? = null
+    private var Matlin = Mat(width, height, CvType.CV_8UC4)
+    private var gMatlin = Mat(width, height, CvType.CV_8UC4)
     private var mCascadeFile: File? = null
-    private var mNativeDetector: DetectionBasedTracker? = null
+    private lateinit var mNativeDetector: DetectionBasedTracker
 
     private var mRelativeFaceSize = 0.2f
-    private var mAbsoluteFaceSize = 0
+    private var mAbsoluteFaceSize = (height * 0.2f).toInt()
     private val FACE_RECT_COLOR = Scalar(0.0, 255.0, 0.0, 255.0)
 
-    init {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         Log.i(TAG, "OpenCV loaded successfully")
         try {
             // load cascade file from application resources
@@ -52,9 +54,6 @@ class FaceDetectFragment : BaseImageFragment() {
             Log.e(TAG, "Failed to load cascade. Exception thrown: $e")
         }
 
-        gMatlin = Mat(width, height, CvType.CV_8UC4)
-        Matlin = Mat(width, height, CvType.CV_8UC4)
-        mAbsoluteFaceSize = (height * 0.2f).toInt()
     }
 
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
@@ -63,14 +62,14 @@ class FaceDetectFragment : BaseImageFragment() {
             if (Math.round(height * mRelativeFaceSize) > 0) {
                 mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize)
             }
-            mNativeDetector!!.setMinFaceSize(mAbsoluteFaceSize)
+            mNativeDetector.setMinFaceSize(mAbsoluteFaceSize)
         }
 
         if (rotation == Surface.ROTATION_0) {
             val faces = MatOfRect()
             Core.rotate(gray, gMatlin, Core.ROTATE_90_CLOCKWISE);
             Core.rotate(rgba, Matlin, Core.ROTATE_90_CLOCKWISE);
-            mNativeDetector!!.detect(gMatlin!!, faces)
+            mNativeDetector.detect(gMatlin, faces)
 
             val faceArray = faces.toArray();
             faceArray.forEach {
@@ -81,7 +80,7 @@ class FaceDetectFragment : BaseImageFragment() {
 
         } else {
             val faces = MatOfRect()
-            mNativeDetector!!.detect(gray, faces)
+            mNativeDetector.detect(gray, faces)
             faces.toArray().forEach {
                 Imgproc.rectangle(rgba, it.tl(), it.br(), FACE_RECT_COLOR, 2);
             }

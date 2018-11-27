@@ -8,10 +8,17 @@
                 android:id="@+id/blurring"
                 android:title="平滑处理"
                 android:icon="@drawable/ic_menu_gallery"/>
+
+        <item
+                android:id="@+id/edgedetect"
+                android:title="边缘检测"
+                android:icon="@drawable/ic_menu_gallery"/>
+
         <item
                 android:id="@+id/facedetect"
                 android:title="人脸检测"
                 android:icon="@drawable/ic_menu_gallery"/>
+
     </group>
 
 </menu>

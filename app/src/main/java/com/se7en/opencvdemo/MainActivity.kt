@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
 import com.se7en.opencvdemo.blurring.BlurringFragment
+import com.se7en.opencvdemo.edgedetect.EdgeDetectFragment
 import com.se7en.opencvdemo.facedetect.FaceDetectFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -84,10 +85,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.blurring -> {
-                currentImageFragment = replaceFragment(BlurringFragment())
+                replaceFragment(BlurringFragment())
+            }
+            R.id.edgedetect->{
+                replaceFragment(EdgeDetectFragment())
             }
             R.id.facedetect -> {
-                currentImageFragment = replaceFragment(FaceDetectFragment())
+                 replaceFragment(FaceDetectFragment())
             }
         }
 
@@ -101,8 +105,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mRgba = Mat(width, height, CvType.CV_8UC4)
         mGray = Mat(height, width, CvType.CV_8UC4)
 
-        if(currentImageFragment == null)
-            replaceFragment(BlurringFragment())
+//        if(currentImageFragment == null)
+//            replaceFragment(BlurringFragment())
     }
 
     override fun onCameraViewStopped() {
@@ -112,7 +116,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Core.flip(inputFrame.rgba(), mRgba, 1);
         Core.flip(inputFrame.gray(), mGray, 1);
 
-        return if (currentImageFragment != null) currentImageFragment!!.ProcessImage(mRgba, mGray) else mRgba
+        if(currentImageFragment!=null){
+            return if(currentImageFragment!!.isPressing)
+                currentImageFragment!!.OriginalImage(mRgba,mGray)
+            else
+                currentImageFragment!!.ProcessImage(mRgba,mGray)
+        }
+
+        return mRgba
     }
 
     public override fun onResume() {
