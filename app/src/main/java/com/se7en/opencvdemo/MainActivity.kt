@@ -6,6 +6,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
+import com.se7en.opencvdemo.blurring.BlurringFragment
+import com.se7en.opencvdemo.facedetect.FaceDetectFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.opencv.android.BaseLoaderCallback
@@ -26,16 +28,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             System.loadLibrary("native-lib")
         }
     }
-    private var mRgba: Mat? = null
-    private var mGray: Mat? = null
 
-    private var currentProcessor : BaseImageProcessor ?= null
+    private lateinit var mRgba: Mat
+    private lateinit var mGray: Mat
+    private var width: Int = 0
+    private var height: Int = 0
+
+    private var currentImageFragment: BaseImageFragment? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        val toggle = ActionBarDrawerToggle(this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        val toggle = ActionBarDrawerToggle(
+            this,
+            drawer_layout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
         drawer_layout.openDrawer(GravityCompat.START)
@@ -46,7 +58,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         cameraView.setCvCameraViewListener(this)
         cameraView.enableView()
 
-//        replaceFragment(TextureMappingFragment())
     }
 
     override fun onBackPressed() {
@@ -57,24 +68,41 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 //
-//    fun replaceFragment(fragment: Fragment) {
-//        supportFragmentManager.beginTransaction().replace(id.fragmentContainer, fragment).commit()
-//    }
+    fun replaceFragment(fragment: BaseImageFragment) : BaseImageFragment{
+        fragment.arguments = Bundle().apply {
+            putInt("width",width)
+            putInt("height",height)
+            putInt("rotation",cameraView.display.rotation)
+        }
+        currentImageFragment = fragment
+        supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit()
+        return fragment
+    }
 
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-//        when (item.itemId) {
-
-//        }
+        when (item.itemId) {
+            R.id.blurring -> {
+                currentImageFragment = replaceFragment(BlurringFragment())
+            }
+            R.id.facedetect -> {
+                currentImageFragment = replaceFragment(FaceDetectFragment())
+            }
+        }
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
     }
 
     override fun onCameraViewStarted(width: Int, height: Int) {
-        mRgba = Mat(width, height, CvType.CV_8UC4);
-        mGray = Mat(height, width, CvType.CV_8UC4);
+        this.width = width
+        this.height = height
+        mRgba = Mat(width, height, CvType.CV_8UC4)
+        mGray = Mat(height, width, CvType.CV_8UC4)
+
+        if(currentImageFragment == null)
+            replaceFragment(BlurringFragment())
     }
 
     override fun onCameraViewStopped() {
@@ -84,7 +112,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Core.flip(inputFrame.rgba(), mRgba, 1);
         Core.flip(inputFrame.gray(), mGray, 1);
 
-        return  mRgba!!
+        return if (currentImageFragment != null) currentImageFragment!!.ProcessImage(mRgba, mGray) else mRgba
     }
 
     public override fun onResume() {
