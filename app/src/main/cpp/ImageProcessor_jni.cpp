@@ -12,10 +12,12 @@ using namespace cv;
 
 void
 Java_com_se7en_opencvdemo_ImageProcessor_nativeImageAdd(JNIEnv *, jclass, jlong src1, jlong src2, jlong dst) {
-//    CvMat cvsrc1Mat = *((Mat *) src1);
-//
-//    CvMat cvsrc2Mat = *((Mat *) src2);
-//
-//    CvMat cvdstMat = *((Mat *) dst);
     add(*((Mat *) src1), *((Mat *) src2), *((Mat *) dst));
+}
+
+void
+Java_com_se7en_opencvdemo_ImageProcessor_nativeImageInverse(JNIEnv *, jclass, jlong src, jlong dst) {
+    CvMat srcMat = *((Mat *) src);
+    CvMat dstMat = *((Mat *) dst);
+    cvNot(&srcMat, &dstMat);
 }

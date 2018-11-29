@@ -43,13 +43,12 @@ class EdgeDetectFragment : BaseImageFragment() {
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
         Imgproc.filter2D(rgba, sobel1Mat, -1, sobel1)
         Imgproc.filter2D(rgba, sobel2Mat, -1, sobel2)
-        ImageProcessor.imageAdd(sobel1Mat, sobel2Mat,rgba)
+        ImageProcessor.imageAdd(sobel1Mat, sobel2Mat, rgba)
         return rgba
     }
 
     override fun OriginalImage(rgba: Mat, gray: Mat): Mat {
-        Imgproc.filter2D(rgba, sobel1Mat, -1, sobel1)
-        return sobel1Mat
+        ImageProcessor.imageInverse(ProcessImage(rgba, gray), rgba)
+        return rgba
     }
-
 }
