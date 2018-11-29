@@ -7,12 +7,13 @@ import android.view.ViewGroup
 import com.se7en.opencvdemo.BaseImageFragment
 import com.se7en.opencvdemo.databinding.BlurringBinding
 import org.opencv.core.Mat
+import org.opencv.imgproc.Imgproc
 
 
 class BlurringFragment : BaseImageFragment() {
     lateinit var binding: BlurringBinding
-    var kWidth: Int = 11
-    var kHeight: Int = 11
+    var kSize: Int = 11
+    var sigma: Int = 0
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = BlurringBinding.inflate(inflater, container, false)
@@ -21,12 +22,9 @@ class BlurringFragment : BaseImageFragment() {
     }
 
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
-        if (kWidth % 2 == 0) kWidth++
-        if (kHeight % 2 == 0) kHeight++
-        nativeSmooth(rgba.nativeObj, rgba.nativeObj, kWidth, kHeight, 0.0, 0.0)
-
+        if (kSize % 2 == 0) kSize++
+        val gauss = Imgproc.getGaussianKernel(kSize, sigma.toDouble())
+        Imgproc.filter2D(rgba, rgba, -1, gauss)
         return rgba
     }
-
-    private external fun nativeSmooth(src: Long, dst: Long, param1: Int, param2: Int, param3: Double, param4: Double)
 }

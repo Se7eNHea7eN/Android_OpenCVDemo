@@ -2,6 +2,7 @@ package com.se7en.opencvdemo.edgedetect
 
 import android.os.Bundle
 import com.se7en.opencvdemo.BaseImageFragment
+import com.se7en.opencvdemo.ImageProcessor
 import org.opencv.core.CvType
 import org.opencv.core.CvType.CV_8UC4
 import org.opencv.core.Mat
@@ -31,8 +32,8 @@ class EdgeDetectFragment : BaseImageFragment() {
         )
     }
 
-    private lateinit var sobel1Mat : Mat
-    private lateinit var sobel2Mat : Mat
+    private lateinit var sobel1Mat: Mat
+    private lateinit var sobel2Mat: Mat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sobel1Mat = Mat(width, height, CV_8UC4)
@@ -40,16 +41,10 @@ class EdgeDetectFragment : BaseImageFragment() {
     }
 
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
-//        Imgproc.filter2D(rgba, sobel1Mat, -1, sobel1)
+        Imgproc.filter2D(rgba, sobel1Mat, -1, sobel1)
         Imgproc.filter2D(rgba, sobel2Mat, -1, sobel2)
-//        sobel1Mat.copyTo(sobel2Mat)
-//        for (i in 0..width)
-//            for (j in 0..height) {
-//                val value = Math.sqrt(sobel1Mat.get(i, j)[0] * sobel1Mat.get(i, j)[0] + sobel2Mat.get(i, j)[0] * sobel2Mat.get(i, j)[0]).toByte()
-//                rgba.put(i, j, byteArrayOf(value,value,value,value))
-//            }
-
-        return sobel2Mat
+        ImageProcessor.imageAdd(sobel1Mat, sobel2Mat,rgba)
+        return rgba
     }
 
     override fun OriginalImage(rgba: Mat, gray: Mat): Mat {
