@@ -14,9 +14,9 @@ class EdgeDetectFragment : BaseImageFragment() {
         put(
             0, 0,
             floatArrayOf(
-                1f, 2f, 1f,
-                0f, 0f, 0f,
-                -1f, -2f, -1f
+                 1f, 2f, 1f,
+                 0f, 0f, 0f,
+                -1f,-2f,-1f
             )
         )
     }
@@ -25,9 +25,9 @@ class EdgeDetectFragment : BaseImageFragment() {
         put(
             0, 0,
             floatArrayOf(
-                1f, 0f, -1f,
-                2f, 0f, -2f,
-                1f, 0f, -1f
+                1f,0f,-1f,
+                2f,0f,-2f,
+                1f,0f,-1f
             )
         )
     }
@@ -41,14 +41,14 @@ class EdgeDetectFragment : BaseImageFragment() {
     }
 
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
-        Imgproc.filter2D(rgba, sobel1Mat, -1, sobel1)
-        Imgproc.filter2D(rgba, sobel2Mat, -1, sobel2)
-        ImageProcessor.imageAdd(sobel1Mat, sobel2Mat, rgba)
-        return rgba
+        Imgproc.filter2D(gray, sobel1Mat, -1, sobel1)
+        Imgproc.filter2D(gray, sobel2Mat, -1, sobel2)
+        ImageProcessor.imageAdd(sobel1Mat, sobel2Mat, gray)
+        return gray
     }
 
     override fun OriginalImage(rgba: Mat, gray: Mat): Mat {
-        ImageProcessor.imageInverse(ProcessImage(rgba, gray), rgba)
-        return rgba
+        ImageProcessor.imageInverse(ProcessImage(rgba, gray), gray)
+        return gray
     }
 }
