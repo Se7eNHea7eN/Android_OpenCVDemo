@@ -10,6 +10,7 @@ import com.google.android.material.navigation.NavigationView
 import com.se7en.opencvdemo.blurring.SmoothFragment
 import com.se7en.opencvdemo.edgedetect.EdgeDetectFragment
 import com.se7en.opencvdemo.facedetect.FaceDetectFragment
+import com.se7en.opencvdemo.sharpening.SharpeningFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.opencv.android.BaseLoaderCallback
@@ -100,6 +101,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.edgedetect -> {
                 replaceFragment(EdgeDetectFragment())
+            }
+            R.id.sharpening -> {
+                replaceFragment(SharpeningFragment())
             }
             R.id.facedetect -> {
                 replaceFragment(FaceDetectFragment())
