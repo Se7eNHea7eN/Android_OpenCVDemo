@@ -119,7 +119,7 @@ class EdgeDetectFragment : BaseImageFragment() {
     }
 
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
-        return strategy.process(gray)
+        return strategy?.process(gray)?:gray
     }
 
 //    override fun OriginalImage(rgba: Mat, gray: Mat): Mat {
