@@ -57,7 +57,7 @@ class EdgeDetectFragment : BaseImageFragment() {
             }
         }
 
-        class Laplace(val width: Int, val height: Int) : EdgeDetectStrategy() {
+        class Laplace: EdgeDetectStrategy() {
             private val laplace = Mat(3, 3, CvType.CV_32F).apply {
                 put(
                     0, 0,
@@ -71,6 +71,13 @@ class EdgeDetectFragment : BaseImageFragment() {
 
             override fun process(gray: Mat): Mat {
                 Imgproc.filter2D(gray, gray, -1, laplace)
+                return gray
+            }
+        }
+
+        class Canny:EdgeDetectStrategy() {
+            override fun process(gray: Mat): Mat {
+                ImageProcessor.canny(gray,gray,60.0,220.0)
                 return gray
             }
         }
@@ -91,14 +98,16 @@ class EdgeDetectFragment : BaseImageFragment() {
                     val builder = AlertDialog.Builder(activity)
                     val items = arrayOf(
                         EdgeDetectStrategy.Sobel::class.simpleName,
-                        EdgeDetectStrategy.Laplace::class.simpleName
+                        EdgeDetectStrategy.Laplace::class.simpleName,
+                        EdgeDetectStrategy.Canny::class.simpleName
                     )
                     builder.setItems(
                         items
                     ) { _, which ->
                         strategy = when (which) {
                             0 -> EdgeDetectStrategy.Sobel(width, height)
-                            1 -> EdgeDetectStrategy.Laplace(width, height)
+                            1 -> EdgeDetectStrategy.Laplace()
+                            2 -> EdgeDetectStrategy.Canny()
                             else -> EdgeDetectStrategy.Sobel(width, height)
                         }
                         text = items[which]

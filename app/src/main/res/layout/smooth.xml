@@ -3,7 +3,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools">
     <data>
-        <variable name="blurring" type="com.se7en.opencvdemo.blurring.BlurringFragment"/>
+        <variable name="blurring" type="com.se7en.opencvdemo.blurring.SmoothFragment"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,25 +11,24 @@
             android:layout_height="match_parent"
             android:padding="20dp">
 
+        <Button android:id="@+id/kernalSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Normalize"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+        />
+
         <SeekBar android:id="@+id/seekBar1"
                  android:layout_width="0dp"
                  android:layout_height="wrap_content"
                  android:progress="@={blurring.kSize}"
-                 android:min="0"
-                 android:max="50"
-                 app:layout_constraintStart_toStartOf="parent"
-                 app:layout_constraintEnd_toEndOf="parent"
-                 app:layout_constraintBottom_toTopOf="@id/seekBar2"
-        />
-        <SeekBar android:id="@+id/seekBar2"
-                 android:layout_width="0dp"
-                 android:layout_height="wrap_content"
-                 android:progress="@={blurring.sigma}"
-                 android:min="0"
-                 android:max="9"
+                 android:min="3"
+                 android:max="27"
                  app:layout_constraintStart_toStartOf="parent"
                  app:layout_constraintEnd_toEndOf="parent"
                  app:layout_constraintBottom_toBottomOf="parent"
         />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

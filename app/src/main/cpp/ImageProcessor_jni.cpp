@@ -21,3 +21,12 @@ Java_com_se7en_opencvdemo_ImageProcessor_nativeImageInverse(JNIEnv *, jclass, jl
     CvMat dstMat = *((Mat *) dst);
     cvNot(&srcMat, &dstMat);
 }
+
+
+void
+Java_com_se7en_opencvdemo_ImageProcessor_nativeCanny(JNIEnv *, jclass, jlong src, jlong dst,
+                                                     jdouble threshold1, jdouble threshold2, jint apertureSize) {
+    CvMat srcMat = *((Mat *) src);
+    CvMat dstMat = *((Mat *) dst);
+    cvCanny(&srcMat, &dstMat, threshold1, threshold2, apertureSize);
+}

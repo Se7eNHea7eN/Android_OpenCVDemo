@@ -1,12 +1,13 @@
 package com.se7en.opencvdemo
 
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import com.google.android.material.navigation.NavigationView
-import com.se7en.opencvdemo.blurring.BlurringFragment
+import com.se7en.opencvdemo.blurring.SmoothFragment
 import com.se7en.opencvdemo.edgedetect.EdgeDetectFragment
 import com.se7en.opencvdemo.facedetect.FaceDetectFragment
 import kotlinx.android.synthetic.main.activity_main.*
@@ -37,6 +38,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private var currentImageFragment: BaseImageFragment? = null
 
+    private var lastFrameDrawTime: Long = 0
+    private var frameRate: Float = 0f
+        set(value) {
+            field = value
+            fps.post {
+                fps.text = "%.1f".format(frameRate)
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,7 +68,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         cameraView.visibility = CameraBridgeViewBase.VISIBLE
         cameraView.setCvCameraViewListener(this)
         cameraView.enableView()
-
+        lastFrameDrawTime = System.currentTimeMillis()
     }
 
     override fun onBackPressed() {
@@ -68,12 +78,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             super.onBackPressed()
         }
     }
-//
-    fun replaceFragment(fragment: BaseImageFragment) : BaseImageFragment{
+
+    //
+    fun replaceFragment(fragment: BaseImageFragment): BaseImageFragment {
         fragment.arguments = Bundle().apply {
-            putInt("width",width)
-            putInt("height",height)
-            putInt("rotation",cameraView.display.rotation)
+            putInt("width", width)
+            putInt("height", height)
+            putInt("rotation", cameraView.display.rotation)
         }
         currentImageFragment = fragment
         supportFragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit()
@@ -85,13 +96,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.blurring -> {
-                replaceFragment(BlurringFragment())
+                replaceFragment(SmoothFragment())
             }
-            R.id.edgedetect->{
+            R.id.edgedetect -> {
                 replaceFragment(EdgeDetectFragment())
             }
             R.id.facedetect -> {
-                 replaceFragment(FaceDetectFragment())
+                replaceFragment(FaceDetectFragment())
             }
         }
 
@@ -106,7 +117,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mGray = Mat(height, width, CvType.CV_8UC4)
 
 //        if(currentImageFragment == null)
-//            replaceFragment(BlurringFragment())
+//            replaceFragment(SmoothFragment())
     }
 
     override fun onCameraViewStopped() {
@@ -115,12 +126,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onCameraFrame(inputFrame: CameraBridgeViewBase.CvCameraViewFrame): Mat {
         Core.flip(inputFrame.rgba(), mRgba, 1);
         Core.flip(inputFrame.gray(), mGray, 1);
-
-        if(currentImageFragment!=null){
-            return if(currentImageFragment!!.isPressing)
-                currentImageFragment!!.OriginalImage(mRgba,mGray)
+        val current = System.currentTimeMillis()
+        frameRate = 1000f / (current - lastFrameDrawTime)
+        Log.d("frameRate", frameRate.toString())
+        lastFrameDrawTime = current
+        if (currentImageFragment != null) {
+            return if (currentImageFragment!!.isPressing)
+                currentImageFragment!!.OriginalImage(mRgba, mGray)
             else
-                currentImageFragment!!.ProcessImage(mRgba,mGray)
+                currentImageFragment!!.ProcessImage(mRgba, mGray)
         }
 
         return mRgba

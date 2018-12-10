@@ -1444,7 +1444,7 @@ algorithms, and so on). If you need to compute pixel sums over variable-size win
 @param src input image.
 @param dst output image of the same size and type as src.
 @param ddepth the output image depth (-1 to use src.depth()).
-@param ksize blurring kernel size.
+@param ksize smooth kernel size.
 @param anchor anchor point; default value Point(-1,-1) means that the anchor is at the kernel
 center.
 @param normalize flag, specifying whether the kernel is normalized by its area or not.
@@ -1491,7 +1491,7 @@ anchor, true, borderType)`.
 @param src input image; it can have any number of channels, which are processed independently, but
 the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 @param dst output image of the same size and type as src.
-@param ksize blurring kernel size.
+@param ksize smooth kernel size.
 @param anchor anchor point; default value Point(-1,-1) means that the anchor is at the kernel
 center.
 @param borderType border mode used to extrapolate pixels outside of the image, see #BorderTypes
@@ -2644,7 +2644,7 @@ up-right or rotated rectangular region of the image in a constant time, for exam
 
 \f[\sum _{x_1 \leq x < x_2,  \, y_1  \leq y < y_2}  \texttt{image} (x,y) =  \texttt{sum} (x_2,y_2)- \texttt{sum} (x_1,y_2)- \texttt{sum} (x_2,y_1)+ \texttt{sum} (x_1,y_1)\f]
 
-It makes possible to do a fast blurring or fast block correlation with a variable window size, for
+It makes possible to do a fast smooth or fast block correlation with a variable window size, for
 example. In case of multi-channel images, sums for each channel are accumulated independently.
 
 As a practical example, the next figure shows the calculation of the integral of a straight
