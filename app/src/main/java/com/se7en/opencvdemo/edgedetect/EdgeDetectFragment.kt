@@ -83,7 +83,7 @@ class EdgeDetectFragment : BaseImageFragment() {
         }
     }
 
-    lateinit var strategy: EdgeDetectStrategy
+    var strategy: EdgeDetectStrategy? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
