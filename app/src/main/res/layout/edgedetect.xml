@@ -12,4 +12,13 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_margin="20dp"
     />
+
+    <CheckBox android:id="@+id/useSmooth"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="预平滑处理"
+              android:textColor="@android:color/white"
+              app:layout_constraintTop_toBottomOf="@id/strategySelect"
+              app:layout_constraintStart_toStartOf="@id/strategySelect"
+    />
 </androidx.constraintlayout.widget.ConstraintLayout>

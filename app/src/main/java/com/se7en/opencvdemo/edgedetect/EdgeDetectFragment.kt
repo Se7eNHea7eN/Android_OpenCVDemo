@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import com.se7en.opencvdemo.BaseImageFragment
 import com.se7en.opencvdemo.ImageProcessor
 import com.se7en.opencvdemo.R
@@ -16,6 +17,9 @@ import org.opencv.imgproc.Imgproc
 
 
 class EdgeDetectFragment : BaseImageFragment() {
+    private var useSmooth = false
+    private val gauss = Imgproc.getGaussianKernel(5, 0.0)
+
     sealed class EdgeDetectStrategy {
         abstract fun process(gray: Mat): Mat
 
@@ -57,7 +61,7 @@ class EdgeDetectFragment : BaseImageFragment() {
             }
         }
 
-        class Laplace: EdgeDetectStrategy() {
+        class Laplace : EdgeDetectStrategy() {
             private val laplace = Mat(3, 3, CvType.CV_32F).apply {
                 put(
                     0, 0,
@@ -75,9 +79,9 @@ class EdgeDetectFragment : BaseImageFragment() {
             }
         }
 
-        class Canny:EdgeDetectStrategy() {
+        class Canny : EdgeDetectStrategy() {
             override fun process(gray: Mat): Mat {
-                ImageProcessor.canny(gray,gray,60.0,220.0)
+                ImageProcessor.canny(gray, gray, 60.0, 220.0)
                 return gray
             }
         }
@@ -115,11 +119,16 @@ class EdgeDetectFragment : BaseImageFragment() {
                     builder.show()
                 }
             }
+            findViewById<CheckBox>(R.id.useSmooth).setOnCheckedChangeListener { compoundButton, b ->
+                useSmooth = b
+            }
         }
     }
 
     override fun ProcessImage(rgba: Mat, gray: Mat): Mat {
-        return strategy?.process(gray)?:gray
+        if (useSmooth)
+            Imgproc.filter2D(gray, gray, -1, gauss)
+        return strategy?.process(gray) ?: gray
     }
 
 //    override fun OriginalImage(rgba: Mat, gray: Mat): Mat {
